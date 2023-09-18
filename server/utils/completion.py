@@ -12,8 +12,6 @@ import inspect
 import importlib
 import os
 
-py_import_regex = r"import:py from (\w+),"
-
 # Jaclang snippets #TODO: add more
 snippets = [
     {
@@ -102,7 +100,7 @@ def _get_completion_items(
             for py_lib in py_libraries
         ]
     ### functions and classes in the imported python library
-    py_import_match = re.match(py_import_regex, before_cursor)
+    py_import_match = re.match(r"import:py from (\w+),", before_cursor)
     if py_import_match:
         py_module = py_import_match.group(1)
         return [

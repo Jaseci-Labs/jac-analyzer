@@ -214,17 +214,17 @@ class ArchitypePass(Pass):
         vars = []
         for node in nodes:
             if isinstance(node, ast.Ability):
-                print(node.to_dict())
-                vars.append(
-                    {
-                        "type": "ability",
-                        "name": node.py_resolve_name(),
-                        "line": node.line,
-                        "col": node.name_ref.col_start
-                        if hasattr(node.name_ref, "col_start")
-                        else 0,
-                    }
-                )
+                try:
+                    vars.append(
+                        {
+                            "type": "ability",
+                            "name": node.name_ref.value,
+                            "line": node.line,
+                            "col": node.name_ref.col_start,
+                        }
+                    )
+                except Exception as e:
+                    print(node.to_dict(), e)
             elif isinstance(node, ast.ArchHas):
                 for var in node.vars.kid:
                     vars.append(
@@ -265,3 +265,14 @@ class ImportPass(Pass):
                 "line": node.line,
             }
         )
+
+
+class ReferencePass(Pass):
+    """
+    A pass that extracts references from a JAC file
+    """
+
+    output = []
+
+    def enter_node(self, node: ast.AstNode):
+        pass

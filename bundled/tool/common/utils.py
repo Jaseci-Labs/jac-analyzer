@@ -133,7 +133,8 @@ def get_all_children(
     ls: LanguageServer, sym: Symbol, return_uses: bool = False
 ) -> list[Symbol]:
     for child in sym.children:
-        yield child
+        if not child.do_skip:
+            yield child
         if return_uses:
             yield from child.uses(ls)
         yield from get_all_children(ls, child)

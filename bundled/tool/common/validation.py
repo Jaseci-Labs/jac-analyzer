@@ -66,8 +66,8 @@ def _validate_jac(
         diagnostics.append(
             Diagnostic(
                 range=Range(
-                    start=Position(line=loc.first_line, character=loc.col_start),
-                    end=Position(line=loc.last_line, character=loc.col_end),
+                    start=Position(line=loc.first_line - 1, character=loc.col_start),
+                    end=Position(line=loc.last_line - 1, character=loc.col_end),
                 ),
                 message=msg,
                 severity=DiagnosticSeverity.Error

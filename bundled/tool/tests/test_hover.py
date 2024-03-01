@@ -19,6 +19,8 @@ class TestHover(unittest.TestCase):
         doc = self.ls.workspace.get_text_document(
             "file://bundled/tool/tests/fixtures/main.jac"
         )
-        pos = Position(line=5, character=11)
+        pos = Position(line=6, character=1)
         hover = get_hover_info(self.ls, doc, pos)
+        # print(doc)
+        # print(hover)
         self.assertEqual(hover.contents.value, "(walker) GuessGame\nGuessing Game")

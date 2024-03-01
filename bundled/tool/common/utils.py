@@ -133,7 +133,8 @@ def get_all_children(
     ls: LanguageServer, sym: Symbol, return_uses: bool = False
 ) -> list[Symbol]:
     for child in sym.children:
-        yield child
+        if not child.do_skip:
+            yield child
         if return_uses:
             yield from child.uses(ls)
         yield from get_all_children(ls, child)
@@ -183,10 +184,10 @@ def get_all_symbols(
     all_symbols = []
     all_symbols.extend(doc.symbols)
     all_symbols.extend(doc.use_symbols)
-    for sym in doc.symbols:
+    for sym in all_symbols:
         if not include_impl and sym.sym_type == "impl":
             continue
-        if sym.do_skip:
+        if sym.do_skip or (include_impl and sym.sym_type == "impl"):
             yield from get_all_children(ls, sym, True)
             continue
         yield sym
@@ -200,6 +201,15 @@ def get_all_symbols(
                 yield sym
                 yield from sym.uses(ls)
 
+def extract_current_doc_symbols(
+          ls: LanguageServer,
+    doc: TextDocumentItem,
+    include_dep: bool = True,
+    include_impl: bool = False,
+) -> list[Symbol]:
+    all_symbols = list(get_all_symbols(ls, doc, include_dep, include_impl))
+    return [sym for sym in all_symbols if sym.node_origin_file == doc.uri]
+    
 
 def get_scope_at_pos(
     ls: LanguageServer, doc: TextDocumentItem, pos: Position, symbols: list[Symbol]

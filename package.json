@@ -61,7 +61,7 @@
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "tests": "node ./out/test/ts_tests/runTest.js",
         "vsce-package": "mkdir build && vsce package -o build/jaclang-extension.vsix",
-        "test": "vscode-test"
+        "client:test": "vscode-test"
     },
     "contributes": {
         "configuration": {

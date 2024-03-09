@@ -60,7 +60,8 @@
         "lint": "eslint src --ext ts",
         "format-check": "prettier --check 'src/**/*.ts' 'build/**/*.yml' '.github/**/*.yml'",
         "tests": "node ./out/test/ts_tests/runTest.js",
-        "vsce-package": "mkdir build && vsce package -o build/jaclang-extension.vsix"
+        "vsce-package": "mkdir build && vsce package -o build/jaclang-extension.vsix",
+        "client:test": "vscode-test"
     },
     "contributes": {
         "configuration": {
@@ -214,7 +215,8 @@
         "@types/vscode": "^1.74.0",
         "@typescript-eslint/eslint-plugin": "^6.7.0",
         "@typescript-eslint/parser": "^6.7.0",
-        "@vscode/test-electron": "^2.3.4",
+        "@vscode/test-cli": "^0.0.6",
+        "@vscode/test-electron": "^2.3.9",
         "@vscode/vsce": "^2.21.0",
         "chai": "^4.3.8",
         "eslint": "^8.49.0",

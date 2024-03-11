@@ -17,9 +17,10 @@ class TestDefinition(unittest.TestCase):
 
     def test_definition(self):
         def_params = MagicMock()
-        def_params.position = Position(line=8, character=1)
-        def_params.text_document.uri = "file://bundled/tool/tests/fixtures/main.jac"
+        def_params.position = Position(line=11, character=7)
+        def_params.text_document.uri = "file://bundled/tool/tests/fixtures/circle.jac"
         output = definition(self.ls, def_params)
+        print(output)
         #self.assertEqual(output.range.start.line, 7)
         self.assertIsNone(output)
         #print(output)

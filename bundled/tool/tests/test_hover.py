@@ -17,10 +17,8 @@ class TestHover(unittest.TestCase):
 
     def test_hover(self):
         doc = self.ls.workspace.get_text_document(
-            "file://bundled/tool/tests/fixtures/main.jac"
+            "file://bundled/tool/tests/fixtures/circle.jac"
         )
-        pos = Position(line=6, character=1)
+        pos = Position(line=11, character=7)
         hover = get_hover_info(self.ls, doc, pos)
-        # print(doc)
-        # print(hover)
-        self.assertEqual(hover.contents.value, "(walker) GuessGame\nGuessing Game")
+        self.assertEqual(hover.contents.value, "(ability) calculate_area\nFunction to calculate the area of a circle.")

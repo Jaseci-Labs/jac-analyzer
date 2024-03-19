@@ -15,7 +15,7 @@ suite('Document Selector Tests', () => {
     teardown(() => {
         sinon.restore();
     });
-    
+
     test('Document selector default', () => {
         const selector = getDocumentSelector();
         assert.deepStrictEqual(selector, [

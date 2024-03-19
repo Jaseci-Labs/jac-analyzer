@@ -100,14 +100,17 @@ class Symbol:
         self.node = (
             node.owner
             if isinstance(node, SymbolTable)
-            else node.decl if isinstance(node, JSymbol) else node
+            else node.decl
+            if isinstance(node, JSymbol)
+            else node
         )
         self.doc_uri = doc_uri
 
-
     @property
     def do_skip(self):
-        return isinstance(self.node, (IfStmt, WhileStmt, WithStmt, IterForStmt, InForStmt))
+        return isinstance(
+            self.node, (IfStmt, WhileStmt, WithStmt, IterForStmt, InForStmt)
+        )
 
     @property
     def sym_name(self):
@@ -341,8 +344,9 @@ def get_doc_symbols(ls: LanguageServer, doc_uri: str) -> List[Symbol]:
     for sym in module.ir.sym_tab.tab.values():
         if str(sym.sym_type) != "var" or sym.decl.loc.first_line == 0:
             continue
-        symbols.append(Symbol(sym, doc_uri)) 
+        symbols.append(Symbol(sym, doc_uri))
     return symbols
+
 
 def get_use_symbols(ls: LanguageServer, doc_uri: str) -> List[Symbol]:
     symbols: List[Symbol] = []

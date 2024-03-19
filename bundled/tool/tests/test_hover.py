@@ -21,4 +21,7 @@ class TestHover(unittest.TestCase):
         )
         pos = Position(line=11, character=7)
         hover = get_hover_info(self.ls, doc, pos)
-        self.assertEqual(hover.contents.value, "(ability) calculate_area\nFunction to calculate the area of a circle.")
+        self.assertEqual(
+            hover.contents.value,
+            "(ability) calculate_area\nFunction to calculate the area of a circle.",
+        )

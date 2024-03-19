@@ -38,7 +38,7 @@ from common.symbols import (  # noqa: E402
     update_doc_deps,
 )
 from common.hover import get_hover_info  # noqa: E402
-from common.logging import log_to_output,log_error  # noqa: E402
+from common.logging import log_to_output, log_error  # noqa: E402
 from common.constants import (  # noqa: E402
     SEMANTIC_TOKEN_TYPES,
     SEMANTIC_TOKEN_MODIFIERS,
@@ -141,7 +141,7 @@ async def did_open(ls: server.LanguageServer, params: lsp.DidOpenTextDocumentPar
     diagnostics = validate(ls, params)
     ls.publish_diagnostics(params.text_document.uri, diagnostics)
 
-    try:   # if any of the diagnostics are errors, then don't update the document tree
+    try:  # if any of the diagnostics are errors, then don't update the document tree
         if not any(
             diagnostic.severity == lsp.DiagnosticSeverity.Error
             for diagnostic in diagnostics
@@ -398,6 +398,7 @@ def document_symbol(ls, params: lsp.DocumentSymbolParams) -> list[lsp.DocumentSy
         return doc_syms
     except Exception as e:
         log_error(ls, f"Error during document symbol: {e}")
+
 
 @LSP_SERVER.feature(
     lsp.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,

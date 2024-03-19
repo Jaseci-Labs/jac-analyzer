@@ -84,7 +84,7 @@ suite('Settings Tests', () => {
 
             const settings: ISettings = await getWorkspaceSettings('mypy', workspace1, true);
             assert.deepStrictEqual(settings.interpreter, [
-               
+
             ]);
             // TODO: Currently inteprater is defined manually, we have to find out how to configure it automatically
             // assert.deepStrictEqual(settings.interpreter, [

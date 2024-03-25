@@ -139,10 +139,11 @@ def get_all_children(
             yield from child.uses(ls)
         yield from get_all_children(ls, child)
 
+
 def sort_chunks_by_first_then_second_value(chunks: List[List[int]]) -> List[List[int]]:
     def custom_sort_key(chunk: List[int]) -> Tuple[int, int]:
         return (chunk[0], chunk[1])
-    
+
     sorted_chunks = sorted(chunks, key=custom_sort_key)
     return sorted_chunks
 
@@ -166,7 +167,8 @@ def sort_chunks_relative_to_previous(chunks: List[List[int]]) -> List[List[int]]
             relative_chunk = [delta_line, delta_start, chunk[2], chunk[3], chunk[4]]
             relative_chunks.append(relative_chunk)
 
-    return relative_chunks 
+    return relative_chunks
+
 
 def flatten_chunks(chunks: List[List[int]]) -> List[int]:
     flat_chunks: List[int] = []

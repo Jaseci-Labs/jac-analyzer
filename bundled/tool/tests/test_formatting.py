@@ -15,7 +15,7 @@ class TestFormattingIntegration(unittest.TestCase):
 
     def test_formatting(self):
         doc = self.ls.workspace.get_text_document(
-            uri="file://bundled/tool/tests/fixtures/format.jac"
+            uri="file://bundled/tool/tests/fixtures/circle.jac"
         )
         source = doc.source
         formatted = format_jac(source)

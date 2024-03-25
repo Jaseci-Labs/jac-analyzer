@@ -15,7 +15,7 @@ class TestSymbols(unittest.TestCase):
 
     def test_symbols(self):
         doc = self.ls.workspace.get_text_document(
-            "file://bundled/tool/tests/fixtures/main.jac"
+            "file://bundled/tool/tests/fixtures/circle.jac"
         )
         self.assertGreater(len(doc.symbols), 0)
         self.assertGreater(len(list(doc.symbols[0].children)), 0)

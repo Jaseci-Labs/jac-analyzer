@@ -11,7 +11,7 @@ suite('Document Selector Tests', () => {
     setup(() => {
         isVirtualWorkspaceStub = sinon.stub(vscodeapi, 'isVirtualWorkspace');
         isVirtualWorkspaceStub.returns(false);
-    });
+    })
     teardown(() => {
         sinon.restore();
     });
@@ -19,13 +19,13 @@ suite('Document Selector Tests', () => {
     test('Document selector default', () => {
         const selector = getDocumentSelector();
         assert.deepStrictEqual(selector, [
-            { scheme: 'file', language: 'python' },
-            { scheme: 'untitled', language: 'python' },
+            { scheme: 'file', language: 'jac' },
+            { scheme: 'untitled', language: 'jac' },
         ]);
     });
     test('Document selector virtual workspace', () => {
         isVirtualWorkspaceStub.returns(true);
         const selector = getDocumentSelector();
-        assert.deepStrictEqual(selector, [{ language: 'python' }]);
+        assert.deepStrictEqual(selector, [{ language: 'jac' }]);
     });
 });

@@ -359,17 +359,16 @@ def get_completion_items(
         ]
 
     # inside a jac scope
-    """
-    {normal python stuff}
-    """
-    all_symbol_names = list(set(get_all_symbol_names(get_all_symbols(ls, doc, False, True))))
-    completion_items += [
-        CompletionItem(
-            label=name,
-            kind=CompletionItemKind.Variable,
-            insert_text=name,
-        )
-        for name in all_symbol_names
-        if name.startswith(last_word)
-    ]
+    if re.match(r"^[a-zA-Z0-9_]*$", last_word):
+        all_symbol_names = list(set(get_all_symbol_names(get_all_symbols(ls, doc, False, True))))
+        completion_items += [
+            CompletionItem(
+                label=name,
+                kind=CompletionItemKind.Variable,
+                insert_text=name,
+            )
+            for name in all_symbol_names
+            if name.startswith(last_word)
+        ]
+   
     return completion_items

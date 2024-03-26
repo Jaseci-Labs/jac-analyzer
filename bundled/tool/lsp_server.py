@@ -38,7 +38,7 @@ from common.symbols import (  # noqa: E402
     update_doc_deps,
 )
 from common.hover import get_hover_info  # noqa: E402
-from common.logging import log_to_output  # noqa: E402
+from common.logging import log_to_output, log_error  # noqa: E402
 from common.constants import (  # noqa: E402
     SEMANTIC_TOKEN_TYPES,
     SEMANTIC_TOKEN_MODIFIERS,
@@ -91,8 +91,17 @@ def did_change(ls: server.LanguageServer, params: lsp.DidChangeTextDocumentParam
         ls (LanguageServer): The language server instance.
         params (lsp.DidChangeTextDocumentParams): The parameters for the text document change.
     """
-    diagnostics = validate(ls, params, True, False)
-    ls.publish_diagnostics(params.text_document.uri, diagnostics)
+    try:
+        diagnostics = validate(ls, params, True, True)
+        ls.publish_diagnostics(params.text_document.uri, diagnostics)
+        if not any(
+            diagnostic.severity == lsp.DiagnosticSeverity.Error
+            for diagnostic in diagnostics
+        ):
+            update_doc_tree(ls, params.text_document.uri)
+            update_doc_deps(ls, params.text_document.uri)
+    except Exception as e:
+        log_error(ls, f"Error during document change: {e}")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_SAVE)
@@ -104,19 +113,22 @@ def did_save(ls, params: lsp.DidSaveTextDocumentParams):
         ls (LanguageServer): The language server instance.
         params (lsp.DidSaveTextDocumentParams): The parameters for the saved text document.
     """
-    doc = ls.workspace.get_text_document(params.text_document.uri)
-    doc.version += 1
+    try:
+        doc = ls.workspace.get_text_document(params.text_document.uri)
+        doc.version += 1
 
-    diagnostics = validate(ls, params, False, True)
-    ls.publish_diagnostics(params.text_document.uri, diagnostics)
+        diagnostics = validate(ls, params, False, True)
+        ls.publish_diagnostics(params.text_document.uri, diagnostics)
 
-    # if any of the diagnostics are errors, then don't update the document tree
-    if not any(
-        diagnostic.severity == lsp.DiagnosticSeverity.Error
-        for diagnostic in diagnostics
-    ):
-        update_doc_tree(ls, params.text_document.uri)
-        update_doc_deps(ls, params.text_document.uri)
+        # if any of the diagnostics are errors, then don't update the document tree
+        if not any(
+            diagnostic.severity == lsp.DiagnosticSeverity.Error
+            for diagnostic in diagnostics
+        ):
+            update_doc_tree(ls, params.text_document.uri)
+            update_doc_deps(ls, params.text_document.uri)
+    except Exception as e:  # Catch potential errors
+        log_error(ls, f"Error during document save {e}")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_OPEN)
@@ -135,13 +147,16 @@ async def did_open(ls: server.LanguageServer, params: lsp.DidOpenTextDocumentPar
     diagnostics = validate(ls, params)
     ls.publish_diagnostics(params.text_document.uri, diagnostics)
 
-    # if any of the diagnostics are errors, then don't update the document tree
-    if not any(
-        diagnostic.severity == lsp.DiagnosticSeverity.Error
-        for diagnostic in diagnostics
-    ):
-        update_doc_tree(ls, params.text_document.uri)
-        update_doc_deps(ls, params.text_document.uri)
+    try:  # if any of the diagnostics are errors, then don't update the document tree
+        if not any(
+            diagnostic.severity == lsp.DiagnosticSeverity.Error
+            for diagnostic in diagnostics
+        ):
+            update_doc_tree(ls, params.text_document.uri)
+            update_doc_deps(ls, params.text_document.uri)
+
+    except Exception as e:  # Catch potential errors
+        log_error(ls, f"Error during document opening: {e}")
 
 
 # Handle File Operations
@@ -154,7 +169,10 @@ async def did_open(ls: server.LanguageServer, params: lsp.DidOpenTextDocumentPar
     ),
 )
 def did_create_files(ls: server.LanguageServer, params: lsp.CreateFilesParams):
-    fill_workspace(ls)
+    try:
+        fill_workspace(ls)
+    except Exception as e:  # Catch potential errors
+        log_error(ls, f"Error during file creation: {e}")
 
 
 @LSP_SERVER.feature(
@@ -166,27 +184,29 @@ def did_create_files(ls: server.LanguageServer, params: lsp.CreateFilesParams):
 def did_rename_files(ls: server.LanguageServer, params: lsp.RenameFilesParams):
     new_uri = params.files[0].new_uri
     old_uri = params.files[0].old_uri
-
-    ls.workspace_filled = False
-    dep_table_copy = ls.dep_table.copy()
-    for doc in dep_table_copy.keys():
-        if dep_table_copy[doc]:
-            for dep in dep_table_copy[doc]:
-                if dep["uri"] == old_uri:
-                    ls.show_message(
-                        f"Renamed {new_uri} is a dependency of {doc}",
-                        lsp.MessageType.Warning,
-                    )
-                    del ls.dep_table[doc]
-                    # FUTURE TODO: WINDOW_SHOW_MESSAGE_REQUEST is not yet supported by pygls
-                    # request_result = await show_message_request(ls, f"Renamed {new_uri} is a dependency of {doc}. Do you want to change the import statement?", ["Yes", "No"])
-                    request_result = "Yes"
-                    if request_result == "Yes":
-                        # TODO: Handle the rename of the import statement
-                        log_to_output(ls, "Accepted")
-    ls.workspace.remove_text_document(old_uri)
-    del ls.dep_table[old_uri.replace("file://", "")]
-    fill_workspace(ls)
+    try:
+        ls.workspace_filled = False
+        dep_table_copy = ls.dep_table.copy()
+        for doc in dep_table_copy.keys():
+            if dep_table_copy[doc]:
+                for dep in dep_table_copy[doc]:
+                    if dep["uri"] == old_uri:
+                        ls.show_message(
+                            f"Renamed {new_uri} is a dependency of {doc}",
+                            lsp.MessageType.Warning,
+                        )
+                        del ls.dep_table[doc]
+                        # FUTURE TODO: WINDOW_SHOW_MESSAGE_REQUEST is not yet supported by pygls
+                        # request_result = await show_message_request(ls, f"Renamed {new_uri} is a dependency of {doc}. Do you want to change the import statement?", ["Yes", "No"])
+                        request_result = "Yes"
+                        if request_result == "Yes":
+                            # TODO: Handle the rename of the import statement
+                            log_to_output(ls, "Accepted")
+        ls.workspace.remove_text_document(old_uri)
+        del ls.dep_table[old_uri.replace("file://", "")]
+        fill_workspace(ls)
+    except Exception as e:  # Catch potential errors
+        log_error(ls, f"Error during file rename: {e}")
 
 
 @LSP_SERVER.feature(
@@ -201,18 +221,21 @@ def did_delete_files(ls: server.LanguageServer, params: lsp.DeleteFilesParams):
     If a file is a dependency of another file, it will also be removed from the dependency table.
     """
     for _file in params.files:
-        ls.workspace.remove_text_document(_file.uri)
-        del ls.dep_table[_file.uri.replace("file://", "")]
-        dep_table_copy = ls.dep_table.copy()
-        for doc in dep_table_copy.keys():
-            if dep_table_copy[doc]:
-                for dep in dep_table_copy[doc]:
-                    if dep["uri"] == _file.uri:
-                        ls.show_message(
-                            f"Deleted {_file.uri} is a dependency of {doc}",
-                            lsp.MessageType.Warning,
-                        )
-                        del ls.dep_table[doc]
+        try:
+            ls.workspace.remove_text_document(_file.uri)
+            del ls.dep_table[_file.uri.replace("file://", "")]
+            dep_table_copy = ls.dep_table.copy()
+            for doc in dep_table_copy.keys():
+                if dep_table_copy[doc]:
+                    for dep in dep_table_copy[doc]:
+                        if dep["uri"] == _file.uri:
+                            ls.show_message(
+                                f"Deleted {_file.uri} is a dependency of {doc}",
+                                lsp.MessageType.Warning,
+                            )
+                            del ls.dep_table[doc]
+        except Exception as e:  # Catch potential errors
+            log_error(ls, f"Error during file deletion: {e}")
     fill_workspace(ls)
 
 
@@ -247,18 +270,21 @@ def formatting(ls, params: lsp.DocumentFormattingParams):
     """
     TODO: Selective Formatting needs to be implemented
     """
-    doc = ls.workspace.get_text_document(params.text_document.uri)
-    source = doc.source
-    formatted_text = format_jac(source)
-    return [
-        lsp.TextEdit(
-            range=lsp.Range(
-                start=lsp.Position(line=0, character=0),
-                end=lsp.Position(line=len(formatted_text), character=0),
-            ),
-            new_text=formatted_text,
-        )
-    ]
+    try:
+        doc = ls.workspace.get_text_document(params.text_document.uri)
+        source = doc.source
+        formatted_text = format_jac(source)
+        return [
+            lsp.TextEdit(
+                range=lsp.Range(
+                    start=lsp.Position(line=0, character=0),
+                    end=lsp.Position(line=len(formatted_text), character=0),
+                ),
+                new_text=formatted_text,
+            )
+        ]
+    except Exception as e:
+        log_error(ls, f"Error during formatting: {e}")
 
 
 @LSP_SERVER.feature(
@@ -294,32 +320,41 @@ def completions(params: Optional[lsp.CompletionParams] = None) -> lsp.Completion
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DEFINITION)
 def definition(ls, params: lsp.DefinitionParams):
-    doc = ls.workspace.get_text_document(params.text_document.uri)
-    if not hasattr(doc, "symbols"):
-        update_doc_tree(ls, doc.uri)
-    symbol = get_symbol_at_pos(ls, doc, params.position)
-    if symbol is not None:
-        return symbol.defn_loc
+    try:
+        doc = ls.workspace.get_text_document(params.text_document.uri)
+        if not hasattr(doc, "symbols"):
+            update_doc_tree(ls, doc.uri)
+        symbol = get_symbol_at_pos(ls, doc, params.position)
+        if symbol is not None:
+            return symbol.defn_loc
+    except Exception as e:
+        log_error(ls, f"Error during definition: {e}")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_IMPLEMENTATION)
 def implementation(ls, params: lsp.ImplementationParams):
-    doc = ls.workspace.get_text_document(params.text_document.uri)
-    if not hasattr(doc, "symbols"):
-        update_doc_tree(ls, doc.uri)
-    symbol = get_symbol_at_pos(ls, doc, params.position)
-    if symbol is not None:
-        return symbol.impl_loc
+    try:
+        doc = ls.workspace.get_text_document(params.text_document.uri)
+        if not hasattr(doc, "symbols"):
+            update_doc_tree(ls, doc.uri)
+        symbol = get_symbol_at_pos(ls, doc, params.position)
+        if symbol is not None:
+            return symbol.impl_loc
+    except Exception as e:
+        log_error(ls, f"Error during implementation: {e}")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_REFERENCES)
 def references(ls, params: lsp.ReferenceParams):
-    doc = ls.workspace.get_text_document(params.text_document.uri)
-    if not hasattr(doc, "symbols"):
-        update_doc_tree(ls, doc.uri)
-    symbol = get_symbol_at_pos(ls, doc, params.position)
-    if symbol is not None:
-        return [s.location for s in symbol.uses(ls)]
+    try:
+        doc = ls.workspace.get_text_document(params.text_document.uri)
+        if not hasattr(doc, "symbols"):
+            update_doc_tree(ls, doc.uri)
+        symbol = get_symbol_at_pos(ls, doc, params.position)
+        if symbol is not None:
+            return [s.location for s in symbol.uses(ls)]
+    except Exception as e:
+        log_error(ls, f"Error during references: {e}")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_HOVER, lsp.HoverOptions(work_done_progress=True))
@@ -327,12 +362,15 @@ def hover(ls, params: lsp.HoverParams) -> Optional[lsp.Hover]:
     """
     TODO: Add More information to the hover
     """
-    uri = params.text_document.uri
-    position = params.position
-    lsp_document = ls.workspace.get_text_document(uri)
-    all_symbols = list(get_all_symbols(ls, lsp_document, True, True))
-    log_to_output(ls, f"symbols: {all_symbols}")
-    return get_hover_info(ls, lsp_document, position)
+    try:
+        uri = params.text_document.uri
+        position = params.position
+        lsp_document = ls.workspace.get_text_document(uri)
+        all_symbols = list(get_all_symbols(ls, lsp_document, True, True))
+        log_to_output(ls, f"symbols: {all_symbols}")
+        return get_hover_info(ls, lsp_document, position)
+    except Exception as e:
+        log_error(ls, f"Error during hover: {e}")
 
 
 # Symbol Handling
@@ -343,23 +381,30 @@ def workspace_symbol(
     ls, params: lsp.WorkspaceSymbolParams
 ) -> list[lsp.SymbolInformation]:
     """Workspace symbols."""
-    symbols = []
-    for doc in ls.workspace.documents.values():
-        if not hasattr(doc, "symbols"):
-            update_doc_tree(ls, doc.uri)
-        symbols.extend([s.sym_info for s in doc.symbols])
-    return symbols
+    try:
+        symbols = []
+        for doc in ls.workspace.documents.values():
+            if not hasattr(doc, "symbols"):
+                update_doc_tree(ls, doc.uri)
+            symbols.extend([s.sym_info for s in doc.symbols])
+        return symbols
+    except Exception as e:
+        log_error(ls, f"Error during workspace symbol: {e}")
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DOCUMENT_SYMBOL)
 def document_symbol(ls, params: lsp.DocumentSymbolParams) -> list[lsp.DocumentSymbol]:
     """Document symbols."""
-    uri = params.text_document.uri
-    doc = ls.workspace.get_text_document(uri)
-    if not hasattr(doc, "symbols"):
-        update_doc_tree(ls, doc.uri)
-    doc_syms = [s.doc_sym for s in doc.symbols]
-    return doc_syms
+    try:
+        uri = params.text_document.uri
+        doc = ls.workspace.get_text_document(uri)
+        if not hasattr(doc, "symbols"):
+            update_doc_tree(ls, doc.uri)
+        doc_syms = [s.doc_sym for s in doc.symbols if not s.do_skip]
+        return doc_syms
+    except Exception as e:
+        log_error(ls, f"Error during document symbol: {e}")
+
 
 @LSP_SERVER.feature(
     lsp.TEXT_DOCUMENT_SEMANTIC_TOKENS_FULL,
@@ -368,19 +413,22 @@ def document_symbol(ls, params: lsp.DocumentSymbolParams) -> list[lsp.DocumentSy
     ),
 )
 def semantic_tokens_full(ls, params: lsp.SemanticTokensParams) -> lsp.SemanticTokens:
-    uri = params.text_document.uri
-    doc = ls.workspace.get_text_document(uri)
-    if not hasattr(doc, "symbols"):
-        update_doc_tree(ls, doc.uri)
-    symbols = get_all_symbols(ls, doc, True, True)
-    data = []
-    for sym in symbols:
-        if sym.doc_uri != doc.uri:
-            continue
-        data.append(sym.semantic_token)
-    sorted_chunks = sort_chunks_relative_to_previous(data) 
-    sementic_tokens = flatten_chunks(sorted_chunks)
-    return lsp.SemanticTokens(sementic_tokens)
+    try:
+        uri = params.text_document.uri
+        doc = ls.workspace.get_text_document(uri)
+        if not hasattr(doc, "symbols"):
+            update_doc_tree(ls, doc.uri)
+        symbols = get_all_symbols(ls, doc, True, True)
+        data = []
+        for sym in symbols:
+            if sym.doc_uri != doc.uri:
+                continue
+            data.append(sym.semantic_token)
+        sorted_chunks = sort_chunks_relative_to_previous(data)
+        sementic_tokens = flatten_chunks(sorted_chunks)
+        return lsp.SemanticTokens(sementic_tokens)
+    except Exception as e:
+        log_error(ls, f"Error during semantic tokens: {e}")
 
 
 # Commands
@@ -445,17 +493,20 @@ def initialize(params: lsp.InitializeParams) -> None:
 @LSP_SERVER.feature(lsp.WORKSPACE_DID_CHANGE_CONFIGURATION)
 def did_change_configuration(ls, params: lsp.DidChangeConfigurationParams):
     """LSP handler for didChangeConfiguration request."""
-    settings = params.settings["jac"]
-    ls.show_message(
-        f"{WORKSPACE_SETTINGS.values()}",
-        lsp.MessageType.Info,
-    )
-    _update_workspace_settings(settings)
-    ls.settings = WORKSPACE_SETTINGS[os.getcwd()]
-    log_to_output(
-        ls,
-        f"Settings used to run Server:\r\n{json.dumps(settings, indent=4, ensure_ascii=False)}\r\n",
-    )
+    try:
+        settings = params.settings["jac"]
+        ls.show_message(
+            f"{WORKSPACE_SETTINGS.values()}",
+            lsp.MessageType.Info,
+        )
+        _update_workspace_settings(settings)
+        ls.settings = WORKSPACE_SETTINGS[os.getcwd()]
+        log_to_output(
+            ls,
+            f"Settings used to run Server:\r\n{json.dumps(settings, indent=4, ensure_ascii=False)}\r\n",
+        )
+    except Exception as e:
+        log_error(ls, f"Error during configuration change: {e}")
 
 
 # Internal functional and settings management APIs.

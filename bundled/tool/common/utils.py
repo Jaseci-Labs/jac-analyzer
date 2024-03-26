@@ -133,15 +133,17 @@ def get_all_children(
     ls: LanguageServer, sym: Symbol, return_uses: bool = False
 ) -> list[Symbol]:
     for child in sym.children:
-        yield child
+        if not child.do_skip:
+            yield child
         if return_uses:
             yield from child.uses(ls)
         yield from get_all_children(ls, child)
 
+
 def sort_chunks_by_first_then_second_value(chunks: List[List[int]]) -> List[List[int]]:
     def custom_sort_key(chunk: List[int]) -> Tuple[int, int]:
         return (chunk[0], chunk[1])
-    
+
     sorted_chunks = sorted(chunks, key=custom_sort_key)
     return sorted_chunks
 
@@ -165,7 +167,8 @@ def sort_chunks_relative_to_previous(chunks: List[List[int]]) -> List[List[int]]
             relative_chunk = [delta_line, delta_start, chunk[2], chunk[3], chunk[4]]
             relative_chunks.append(relative_chunk)
 
-    return relative_chunks 
+    return relative_chunks
+
 
 def flatten_chunks(chunks: List[List[int]]) -> List[int]:
     flat_chunks: List[int] = []
@@ -185,6 +188,9 @@ def get_all_symbols(
     all_symbols.extend(doc.use_symbols)
     for sym in doc.symbols:
         if not include_impl and sym.sym_type == "impl":
+            continue
+        if sym.do_skip:
+            yield from get_all_children(ls, sym, True)
             continue
         yield sym
         yield from sym.uses(ls)

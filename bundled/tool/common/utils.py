@@ -203,6 +203,12 @@ def get_all_symbols(
                 yield sym
                 yield from sym.uses(ls)
 
+def get_all_symbol_names(symbols: list[Symbol]) -> list[str]:
+    names = []
+    for sym in symbols:
+        names.append(sym.sym_name)
+    return names        
+
 
 def get_scope_at_pos(
     ls: LanguageServer, doc: TextDocumentItem, pos: Position, symbols: list[Symbol]

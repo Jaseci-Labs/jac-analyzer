@@ -34,6 +34,7 @@ from common.completion import get_completion_items  # noqa: E402
 from common.format import format_jac  # noqa: E402
 from common.symbols import (  # noqa: E402
     fill_workspace,
+    fill_doc_workspace,
     update_doc_tree,
     update_doc_deps,
 )
@@ -137,12 +138,24 @@ async def did_open(ls: server.LanguageServer, params: lsp.DidOpenTextDocumentPar
     This function is called when a text document is opened in the client.
     It fills the workspace if it is not already filled and validates the parameters.
     """
-    ls.current_doc = params.text_document
-    if not ls.workspace_filled:
+    if not hasattr(ls, 'workspace_filled'):
         try:
             fill_workspace(ls)
         except Exception as e:
             ls.show_message(f"Error: {e}", lsp.MessageType.Error)
+    ls.current_doc = params.text_document
+    uri = params.text_document.uri
+    doc = ls.workspace.get_text_document(uri)
+    if not ls.workspace_filled:
+        try:
+            fill_workspace(ls)
+        except Exception as e:
+            ls.show_message(f"Error: {e}", lsp.MessageType.Error)    
+    # if not doc.workspace_filled:
+    try:
+        fill_doc_workspace(ls, doc)
+    except Exception as e:
+        ls.show_message(f"Error: {e}", lsp.MessageType.Error)
 
     diagnostics = validate(ls, params)
     ls.publish_diagnostics(params.text_document.uri, diagnostics)

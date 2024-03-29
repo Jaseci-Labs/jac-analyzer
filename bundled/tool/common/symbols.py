@@ -44,10 +44,11 @@ def fill_workspace(ls: LanguageServer) -> None:
             text=mod_info.ir.source.code,
         )
         ls.workspace.put_document(doc)
-        update_doc_tree(ls, doc.uri)
-    for doc in ls.workspace.documents.values():
-        update_doc_deps(ls, doc.uri)
-    ls.workspace_filled = True
+    ls.workspace_filled = True  
+
+def fill_doc_workspace(ls: LanguageServer, doc: TextDocumentItem) -> None:
+    update_doc_tree(ls, doc.uri)
+    update_doc_deps(ls, doc.uri)
 
 
 def update_doc_tree(ls: LanguageServer, doc_uri: str) -> None:

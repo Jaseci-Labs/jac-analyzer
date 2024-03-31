@@ -24,7 +24,7 @@ from .constants import (
 )
 
 from .symbols import get_symbol_by_name
-from .utils import get_relative_path, get_all_symbols, get_scope_at_pos, get_all_symbol_names
+from .utils import get_relative_path, get_all_symbols, get_scope_at_pos, get_cached_symbol_names
 
 
 SCOPE_SNIPPETS = {
@@ -360,7 +360,7 @@ def get_completion_items(
 
     # inside a jac scope
     if re.match(r"^[a-zA-Z0-9_]*$", last_word):
-        all_symbol_names = list(set(get_all_symbol_names(get_all_symbols(ls, doc, False, True))))
+        all_symbol_names = get_cached_symbol_names(ls, doc)
         completion_items += [
             CompletionItem(
                 label=name,

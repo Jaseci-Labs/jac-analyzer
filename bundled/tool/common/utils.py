@@ -186,7 +186,7 @@ def get_all_symbols(
     all_symbols = []
     all_symbols.extend(doc.symbols)
     all_symbols.extend(doc.use_symbols)
-    for sym in doc.symbols:
+    for sym in all_symbols:
         if not include_impl and sym.sym_type == "impl":
             continue
         if sym.do_skip:

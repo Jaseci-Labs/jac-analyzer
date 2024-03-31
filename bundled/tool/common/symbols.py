@@ -35,21 +35,16 @@ OFFSET = 1
 
 
 def fill_workspace(ls: LanguageServer) -> None:
-    ls.jlws = Workspace(path=ls.workspace.root_path)
-    for mod_path, mod_info in ls.jlws.modules.items():
+    ls.jlws = Workspace(path=ls.workspace.root_path,lazy_parse=True)
+    for mod_path in ls.jlws.modules.items():
         doc = TextDocumentItem(
             uri=f"file://{mod_path}",
             language_id="jac",
             version=0,
-            text=mod_info.ir.source.code,
+            text="",
         )
         ls.workspace.put_document(doc)
     ls.workspace_filled = True  
-
-def fill_doc_workspace(ls: LanguageServer, doc: TextDocumentItem) -> None:
-    update_doc_tree(ls, doc.uri)
-    update_doc_deps(ls, doc.uri)
-
 
 def update_doc_tree(ls: LanguageServer, doc_uri: str) -> None:
     doc = ls.workspace.get_text_document(doc_uri)

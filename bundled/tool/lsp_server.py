@@ -34,7 +34,6 @@ from common.completion import get_completion_items  # noqa: E402
 from common.format import format_jac  # noqa: E402
 from common.symbols import (  # noqa: E402
     fill_workspace,
-    fill_doc_workspace,
     update_doc_tree,
     update_doc_deps,
 )
@@ -136,40 +135,27 @@ def did_save(ls, params: lsp.DidSaveTextDocumentParams):
 async def did_open(ls: server.LanguageServer, params: lsp.DidOpenTextDocumentParams):
     """
     This function is called when a text document is opened in the client.
-    It fills the workspace if it is not already filled and validates the parameters.
+    It fills the workspace if it is not already filled, validates the parameters,
+    and performs necessary updates.
     """
-    if not hasattr(ls, 'workspace_filled'):
-        try:
-            fill_workspace(ls)
-        except Exception as e:
-            ls.show_message(f"Error: {e}", lsp.MessageType.Error)
-    ls.current_doc = params.text_document
-    uri = params.text_document.uri
-    doc = ls.workspace.get_text_document(uri)
-    if not ls.workspace_filled:
-        try:
-            fill_workspace(ls)
-        except Exception as e:
-            ls.show_message(f"Error: {e}", lsp.MessageType.Error)    
-    # if not doc.workspace_filled:
     try:
-        fill_doc_workspace(ls, doc)
-    except Exception as e:
-        ls.show_message(f"Error: {e}", lsp.MessageType.Error)
+        if not hasattr(ls, 'workspace_filled'):
+            fill_workspace(ls)
+        uri = params.text_document.uri
+        doc = ls.workspace.get_text_document(uri)
+        if not ls.workspace_filled:
+            fill_workspace(ls)
+        doc = ls.workspace.get_text_document(params.text_document.uri)
+        doc.version += 1
 
-    diagnostics = validate(ls, params)
-    ls.publish_diagnostics(params.text_document.uri, diagnostics)
-
-    try:  # if any of the diagnostics are errors, then don't update the document tree
-        if not any(
-            diagnostic.severity == lsp.DiagnosticSeverity.Error
-            for diagnostic in diagnostics
-        ):
+        diagnostics = validate(ls, params, False, True)    
+        ls.publish_diagnostics(params.text_document.uri, diagnostics)
+        if not any(diagnostic.severity == lsp.DiagnosticSeverity.Error for diagnostic in diagnostics):
             update_doc_tree(ls, params.text_document.uri)
             update_doc_deps(ls, params.text_document.uri)
-
-    except Exception as e:  # Catch potential errors
+    except Exception as e:
         log_error(ls, f"Error during document opening: {e}")
+        ls.show_message(f"Error: {e}", lsp.MessageType.Error)
 
 
 # Handle File Operations

@@ -186,10 +186,10 @@ def get_all_symbols(
     all_symbols = []
     all_symbols.extend(doc.symbols)
     all_symbols.extend(doc.use_symbols)
-    for sym in doc.symbols:
+    for sym in all_symbols:
         if not include_impl and sym.sym_type == "impl":
             continue
-        if sym.do_skip:
+        if sym.do_skip or (include_impl and sym.sym_type == "impl"):
             yield from get_all_children(ls, sym, True)
             continue
         yield sym
@@ -202,6 +202,15 @@ def get_all_symbols(
             for sym in dep["symbols"]:
                 yield sym
                 yield from sym.uses(ls)
+
+def extract_current_doc_symbols(
+          ls: LanguageServer,
+    doc: TextDocumentItem,
+    include_dep: bool = True,
+    include_impl: bool = False,
+) -> list[Symbol]:
+    all_symbols = list(get_all_symbols(ls, doc, include_dep, include_impl))
+    return [sym for sym in all_symbols if sym.node_origin_file == doc.uri]
 
 def get_cached_symbol_names(ls, doc):
     if not hasattr(doc, "cahched_symbol_names"):

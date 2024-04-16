@@ -203,6 +203,20 @@ def get_all_symbols(
                 yield sym
                 yield from sym.uses(ls)
 
+def get_cached_symbol_names(ls, doc):
+    if not hasattr(doc, "cahched_symbol_names"):
+        cahched_symbol_names = list(set(get_all_symbol_names(get_all_symbols(ls, doc, False, True))))
+        doc.cahched_symbol_names = cahched_symbol_names
+        return cahched_symbol_names
+    else:
+        return doc.cahched_symbol_names                         
+
+def get_all_symbol_names(symbols: list[Symbol]) -> list[str]:
+    names = []
+    for sym in symbols:
+        names.append(sym.sym_name)
+    return names        
+
 
 def get_scope_at_pos(
     ls: LanguageServer, doc: TextDocumentItem, pos: Position, symbols: list[Symbol]

@@ -127,6 +127,16 @@ class Symbol:
             return self.ws_symbol.decl.doc.value[3:-3]
         except Exception:
             return ""
+        
+    @property
+    def instance_symbols(self):
+        symbols: List[Symbol] = []
+        if hasattr(self, "sym_tab"):
+            for sym in self.sym_tab.tab.values():
+                if str(sym.sym_type) != "var":
+                    continue
+                symbols.append(Symbol(sym, self.doc_uri))
+        return symbols        
 
     @property
     def defn_loc(self):
@@ -368,6 +378,6 @@ def get_symbol_by_name(
                 if symbol.sym_type == sym_type:
                     return symbol
             else:
-                continue
+                return symbol
             return symbol
     return None

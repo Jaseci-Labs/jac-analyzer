@@ -24,7 +24,7 @@ from .constants import (
 )
 
 from .symbols import get_symbol_by_name
-from .utils import get_relative_path, get_all_symbols, get_scope_at_pos
+from .utils import get_relative_path, get_all_symbols, get_scope_at_pos, get_cached_symbol_names
 
 
 SCOPE_SNIPPETS = {
@@ -98,7 +98,7 @@ def get_completion_items(
         last_symbol_name = re.match(r"(\w+).", last_word).group(1)
         last_symbol = get_symbol_by_name(last_symbol_name, get_all_symbols(ls, doc))
         if last_symbol:
-            for child in last_symbol.children:
+            for child in last_symbol.instance_symbols:
                 completion_items.append(
                     CompletionItem(
                         label=child.sym_name,
@@ -358,8 +358,17 @@ def get_completion_items(
             for snippet in SCOPE_SNIPPETS.get("ability", [])
         ]
 
-    # inside a python block
-    """
-    {normal python stuff}
-    """
+    # inside a jac scope
+    if re.match(r"^[a-zA-Z0-9_]*$", last_word):
+        all_symbol_names = get_cached_symbol_names(ls, doc)
+        completion_items += [
+            CompletionItem(
+                label=name,
+                kind=CompletionItemKind.Variable,
+                insert_text=name,
+            )
+            for name in all_symbol_names
+            if name.startswith(last_word)
+        ]
+   
     return completion_items

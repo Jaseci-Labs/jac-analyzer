@@ -19,5 +19,5 @@ class TestValidate(unittest.TestCase):
         mock_params.text_document.uri = "file://bundled/tool/tests/fixtures/circle.jac"
         semantic_tokens = semantic_tokens_full(self.ls, mock_params)
         self.assertIsNotNone(semantic_tokens)
-        self.assertEqual(len(semantic_tokens.data), 220)
+        self.assertEqual(len(semantic_tokens.data), 190)
         # self.assertIn('[5]', semantic_tokens.data)

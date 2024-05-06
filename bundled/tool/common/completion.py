@@ -24,7 +24,12 @@ from .constants import (
 )
 
 from .symbols import get_symbol_by_name
-from .utils import get_relative_path, get_all_symbols, get_scope_at_pos, get_cached_symbol_names
+from .utils import (
+    get_relative_path,
+    get_all_symbols,
+    get_scope_at_pos,
+    get_cached_symbol_names,
+)
 
 
 SCOPE_SNIPPETS = {
@@ -370,5 +375,5 @@ def get_completion_items(
             for name in all_symbol_names
             if name.startswith(last_word)
         ]
-   
+
     return completion_items

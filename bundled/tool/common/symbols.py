@@ -145,7 +145,7 @@ class Symbol:
             return self.ws_symbol.decl.doc.value[3:-3]
         except Exception:
             return ""
-        
+
     @property
     def instance_symbols(self):
         symbols: List[Symbol] = []
@@ -154,7 +154,7 @@ class Symbol:
                 if str(sym.sym_type) != "var":
                     continue
                 symbols.append(Symbol(sym, self.doc_uri))
-        return symbols        
+        return symbols
 
     @property
     def defn_loc(self):

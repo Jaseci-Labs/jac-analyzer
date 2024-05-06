@@ -7,6 +7,8 @@ import pathlib
 from typing import Optional
 import subprocess
 import sys
+import threading
+from functools import wraps
 
 
 def update_sys_path(path_to_add: str, strategy: str) -> None:
@@ -80,10 +82,30 @@ LSP_SERVER = JacLanguageServer(
     max_workers=MAX_WORKERS,
 )
 
+
+def debounce(wait):
+    def decorator(fn):
+        @wraps(fn)
+        def debounced(*args, **kwargs):
+            def call_it():
+                fn(*args, **kwargs)
+
+            if hasattr(debounced, "_timer"):
+                debounced._timer.cancel()
+
+            debounced._timer = threading.Timer(wait, call_it)
+            debounced._timer.start()
+
+        return debounced
+
+    return decorator
+
+
 # ************** Language Server features ********************
 
 
 @LSP_SERVER.feature(lsp.TEXT_DOCUMENT_DID_CHANGE)
+@debounce(2)  # Debounce for 2 seconds
 def did_change(ls: server.LanguageServer, params: lsp.DidChangeTextDocumentParams):
     """
     Update the document tree and validate the changes made to the text document.

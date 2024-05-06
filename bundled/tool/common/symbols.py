@@ -114,16 +114,20 @@ class Symbol:
 
     @property
     def do_skip(self):
-        return isinstance(self.node, (IfStmt, ElseStmt, ElseIf, WhileStmt, WithStmt, IterForStmt, InForStmt))
-    
-    ''''
+        return isinstance(
+            self.node,
+            (IfStmt, ElseStmt, ElseIf, WhileStmt, WithStmt, IterForStmt, InForStmt),
+        )
+
+    """'
     When there's an include, file will have the AST nodes from the included file.
     For sementic higlighting, hover information etc.. we don't need this nodes to be included..
     so we need to keep track of the origin file of the node.
-    '''
+    """
+
     @property
     def node_origin_file(self):
-        return f"file://{os.path.join(os.getcwd(), self.node.loc.mod_path)}" 
+        return f"file://{os.path.join(os.getcwd(), self.node.loc.mod_path)}"
 
     @property
     def sym_name(self):
@@ -265,34 +269,36 @@ class Symbol:
 
     def _yield_direct_children_symbol(self, symbols):
         for sym in symbols:
-            yield Symbol(sym, self.doc_uri)            
+            yield Symbol(sym, self.doc_uri)
 
     def _yield_nested_block_children(self, kid_sym_tab):
         if isinstance(
             kid_sym_tab.owner,
-            (InForStmt, 
-            IfStmt,
-            ElseStmt,
-            ElseIf,
-            WhileStmt, 
-            WithStmt, 
-            IterForStmt, 
-            AbilityDef, 
-            EnumDef, 
-            ArchDef,   
-            Ability,
-            Architype,
-            HasVar,
-            ParamVar),
+            (
+                InForStmt,
+                IfStmt,
+                ElseStmt,
+                ElseIf,
+                WhileStmt,
+                WithStmt,
+                IterForStmt,
+                AbilityDef,
+                EnumDef,
+                ArchDef,
+                Ability,
+                Architype,
+                HasVar,
+                ParamVar,
+            ),
         ):
             for kid_sym in kid_sym_tab.tab.values():
                 kid_symbol = Symbol(kid_sym, self.doc_uri)
                 yield kid_symbol
             for kid_sym in kid_sym_tab.uses:
                 if hasattr(kid_sym, "name") and kid_sym.name == "NAME":
-                    yield Symbol(kid_sym, self.doc_uri)                 
+                    yield Symbol(kid_sym, self.doc_uri)
         kid_symbol = Symbol(kid_sym_tab, self.doc_uri)
-        yield kid_symbol       
+        yield kid_symbol
 
     def uses(self, ls: LanguageServer) -> List["Symbol"]:
         for mod_url in ls.jlws.modules.keys():

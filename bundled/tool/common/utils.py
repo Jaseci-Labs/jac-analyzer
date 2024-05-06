@@ -203,14 +203,16 @@ def get_all_symbols(
                 yield sym
                 yield from sym.uses(ls)
 
+
 def extract_current_doc_symbols(
-          ls: LanguageServer,
+    ls: LanguageServer,
     doc: TextDocumentItem,
     include_dep: bool = True,
     include_impl: bool = False,
 ) -> list[Symbol]:
     all_symbols = list(get_all_symbols(ls, doc, include_dep, include_impl))
     return [sym for sym in all_symbols if sym.node_origin_file == doc.uri]
+
 
 def get_cached_symbol_names(ls, doc):
     if not hasattr(doc, "cahched_symbol_names"):

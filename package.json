@@ -165,36 +165,6 @@
                     "light": "./assets/file-icon.svg",
                     "dark": "./assets/file-icon.svg"
                 }
-            },
-            {
-                "id": "jac-test",
-                "aliases": [
-                    "Jaclang (Test)",
-                    "jac-test"
-                ],
-                "extensions": [
-                    ".test.jac"
-                ],
-                "configuration": "./language-configuration.json",
-                "icon": {
-                    "light": "./assets/test-icon.svg",
-                    "dark": "./assets/test-icon.svg"
-                }
-            },
-            {
-                "id": "jac-impl",
-                "aliases": [
-                    "Jaclang (Implementation)",
-                    "jac-impl"
-                ],
-                "extensions": [
-                    ".impl.jac"
-                ],
-                "configuration": "./language-configuration.json",
-                "icon": {
-                    "light": "./assets/impl-icon.svg",
-                    "dark": "./assets/impl-icon.svg"
-                }
             }
         ],
         "grammars": [

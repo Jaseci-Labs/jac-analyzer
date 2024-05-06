@@ -53,7 +53,7 @@ from common.utils import (  # noqa: E402
     get_command,
     sort_chunks_relative_to_previous,
     flatten_chunks,
-    extract_current_doc_symbols
+    extract_current_doc_symbols,
 )
 
 

@@ -127,7 +127,7 @@ class Symbol:
 
     @property
     def node_origin_file(self):
-        return f"file://{os.path.join(os.getcwd(), self.node.loc.mod_path)}"
+        return f"file://{self.node.loc.mod_path}"
 
     @property
     def sym_name(self):
@@ -170,7 +170,7 @@ class Symbol:
             else self.ws_symbol.decl
         )
         return Location(
-            uri=f"file://{os.path.join(os.getcwd(), defn_node.loc.mod_path)}",
+            uri=f"file://{defn_node.loc.mod_path}",
             range=Range(
                 start=Position(
                     line=defn_node.sym_name_node.loc.first_line - OFFSET,
@@ -229,7 +229,7 @@ class Symbol:
             ws_symbol = self.is_use.ws_symbol if self.is_use else self.ws_symbol
             if isinstance(ws_symbol.decl.body, AstImplOnlyNode):
                 return Location(
-                    uri=f"file://{os.path.join(os.getcwd(), ws_symbol.decl.body.loc.mod_path)}",
+                    uri=f"file://{ws_symbol.decl.body.loc.mod_path}",
                     range=Range(
                         start=Position(
                             line=ws_symbol.decl.body.loc.first_line - OFFSET,

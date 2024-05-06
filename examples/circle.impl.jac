@@ -1,24 +1,25 @@
 """Enum for shape types"""
-import:py math;
 
 :enum:ShapeType {
-    CIRCLE = "Circle",
-    UNKNOWN = "Unknown"
+    CIRCLE="Circle",
+    UNKNOWN="Unknown"
 }
 
 """Function to calculate the area of a circle."""
-:can:calculate_area(radius: float) -> float {
+:can:calculate_area
+(radius: float) -> float {
     return math.pi * radius * radius;
 }
 
-:obj:Circle:can:<init> (radius: float) {
+:obj:Circle:can:init
+(radius: float) {
     self.radius = radius;
-    <super>.<init>(ShapeType.CIRCLE);
+    super.init(ShapeType.CIRCLE);
 }
 
 """Overridden method to calculate the area of the circle."""
 :obj:Circle:can:area -> float {
-    return math.pi * <self>.radius * <self>.radius;
+    return math.pi * self.radius * self.radius;
 }
 
 :can:main_run {

@@ -189,7 +189,7 @@ def get_all_symbols(
     for sym in all_symbols:
         if not include_impl and sym.sym_type == "impl":
             continue
-        if sym.do_skip:
+        if sym.do_skip or (include_impl and sym.sym_type == "impl"):
             yield from get_all_children(ls, sym, True)
             continue
         yield sym
@@ -203,19 +203,33 @@ def get_all_symbols(
                 yield sym
                 yield from sym.uses(ls)
 
+
+def extract_current_doc_symbols(
+    ls: LanguageServer,
+    doc: TextDocumentItem,
+    include_dep: bool = True,
+    include_impl: bool = False,
+) -> list[Symbol]:
+    all_symbols = list(get_all_symbols(ls, doc, include_dep, include_impl))
+    return [sym for sym in all_symbols if sym.node_origin_file == doc.uri]
+
+
 def get_cached_symbol_names(ls, doc):
     if not hasattr(doc, "cahched_symbol_names"):
-        cahched_symbol_names = list(set(get_all_symbol_names(get_all_symbols(ls, doc, False, True))))
+        cahched_symbol_names = list(
+            set(get_all_symbol_names(get_all_symbols(ls, doc, False, True)))
+        )
         doc.cahched_symbol_names = cahched_symbol_names
         return cahched_symbol_names
     else:
-        return doc.cahched_symbol_names                         
+        return doc.cahched_symbol_names
+
 
 def get_all_symbol_names(symbols: list[Symbol]) -> list[str]:
     names = []
     for sym in symbols:
         names.append(sym.sym_name)
-    return names        
+    return names
 
 
 def get_scope_at_pos(

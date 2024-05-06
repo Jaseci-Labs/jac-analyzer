@@ -53,6 +53,7 @@ from common.utils import (  # noqa: E402
     get_command,
     sort_chunks_relative_to_previous,
     flatten_chunks,
+    extract_current_doc_symbols,
 )
 
 
@@ -81,20 +82,24 @@ LSP_SERVER = JacLanguageServer(
     max_workers=MAX_WORKERS,
 )
 
+
 def debounce(wait):
     def decorator(fn):
         @wraps(fn)
         def debounced(*args, **kwargs):
             def call_it():
                 fn(*args, **kwargs)
-            
-            if hasattr(debounced, '_timer'):
+
+            if hasattr(debounced, "_timer"):
                 debounced._timer.cancel()
-            
+
             debounced._timer = threading.Timer(wait, call_it)
             debounced._timer.start()
+
         return debounced
+
     return decorator
+
 
 # ************** Language Server features ********************
 
@@ -383,7 +388,7 @@ def hover(ls, params: lsp.HoverParams) -> Optional[lsp.Hover]:
         uri = params.text_document.uri
         position = params.position
         lsp_document = ls.workspace.get_text_document(uri)
-        all_symbols = list(get_all_symbols(ls, lsp_document, True, True))
+        all_symbols = list(extract_current_doc_symbols(ls, lsp_document, True, True))
         log_to_output(ls, f"symbols: {all_symbols}")
         return get_hover_info(ls, lsp_document, position)
     except Exception as e:
@@ -435,9 +440,9 @@ def semantic_tokens_full(ls, params: lsp.SemanticTokensParams) -> lsp.SemanticTo
         doc = ls.workspace.get_text_document(uri)
         if not hasattr(doc, "symbols"):
             update_doc_tree(ls, doc.uri)
-        symbols = get_all_symbols(ls, doc, True, True)
+        all_symbols = list(extract_current_doc_symbols(ls, doc, True, True))
         data = []
-        for sym in symbols:
+        for sym in all_symbols:
             if sym.doc_uri != doc.uri:
                 continue
             data.append(sym.semantic_token)

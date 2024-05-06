@@ -2,7 +2,7 @@
     "name": "jaclang-extension",
     "displayName": "%extension.displayName%",
     "description": "%extension.description%",
-    "version": "2024.3.25",
+    "version": "2024.5.7",
     "preview": true,
     "serverInfo": {
         "name": "Jaclang Language Server",
@@ -14,10 +14,10 @@
     "homepage": "https://www.jac-lang.org/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Jaseci-Labs/jaclang-vscode.git"
+        "url": "https://github.com/Jaseci-Labs/jac-analyzer.git"
     },
     "bugs": {
-        "url": "https://github.com/Jaseci-Labs/jaclang-vscode/issues"
+        "url": "https://github.com/Jaseci-Labs/jac-analyzer/issues"
     },
     "galleryBanner": {
         "color": "#1e415e",
@@ -154,8 +154,7 @@
             {
                 "id": "jac",
                 "aliases": [
-                    "Jaseci Programming Language",
-                    "Jac Language",
+                    "Jaclang",
                     "jac"
                 ],
                 "extensions": [

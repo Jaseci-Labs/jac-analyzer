@@ -106,29 +106,23 @@ def _setup_template_environment(session: nox.Session) -> None:
     session.run("npm", "install", external=True)
 
 
-@nox.session(python="3.11")
+@nox.session(python="3.12")
 def install_bundled_libs(session):
     """Installs the libraries that will be bundled with the extension."""
     session.install("wheel")
     _install_bundle(session)
 
 
-@nox.session(python="3.11")
+@nox.session(python="3.12")
 def setup(session: nox.Session) -> None:
     """Sets up the extension for development."""
     _setup_template_environment(session)
 
 
-@nox.session(python="3.11")
+@nox.session(python="3.12")
 def tests(session: nox.Session) -> None:
     """Runs all the tests for the extension."""
     session.run("python -m pytest")
-
-
-# @nox.session(python="3.12")
-# def setup(session: nox.Session) -> None:
-#     """Sets up the extension for development."""
-#     _setup_template_environment(session)
 
 
 @nox.session()

@@ -1,4 +1,4 @@
-[![Release](https://github.com/Jaseci-Labs/jaclang-vscode/actions/workflows/release.yml/badge.svg)](https://github.com/Jaseci-Labs/jaclang-vscode/actions/workflows/release.yml) [![Run Tests](https://github.com/Jaseci-Labs/jaclang-vscode/actions/workflows/ls_tests.yml/badge.svg)](https://github.com/Jaseci-Labs/jaclang-vscode/actions/workflows/ls_tests.yml)
+[![Release](https://github.com/Jaseci-Labs/jaclang-vscode/actions/workflows/release.yml/badge.svg)](https://github.com/Jaseci-Labs/jaclang-vscode/actions/workflows/release.yml) [![Language Server Tests](https://github.com/Jaseci-Labs/jac-analyzer/actions/workflows/ls_tests.yml/badge.svg?branch=main)](https://github.com/Jaseci-Labs/jac-analyzer/actions/workflows/ls_tests.yml)
 
 # Jaclang Language Extension for VScode
 

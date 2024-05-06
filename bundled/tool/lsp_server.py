@@ -81,20 +81,24 @@ LSP_SERVER = JacLanguageServer(
     max_workers=MAX_WORKERS,
 )
 
+
 def debounce(wait):
     def decorator(fn):
         @wraps(fn)
         def debounced(*args, **kwargs):
             def call_it():
                 fn(*args, **kwargs)
-            
-            if hasattr(debounced, '_timer'):
+
+            if hasattr(debounced, "_timer"):
                 debounced._timer.cancel()
-            
+
             debounced._timer = threading.Timer(wait, call_it)
             debounced._timer.start()
+
         return debounced
+
     return decorator
+
 
 # ************** Language Server features ********************
 

@@ -109,7 +109,9 @@ class Symbol:
 
     @property
     def do_skip(self):
-        return isinstance(self.node, (IfStmt, ElseStmt, WhileStmt, WithStmt, IterForStmt, InForStmt))
+        return isinstance(
+            self.node, (IfStmt, ElseStmt, WhileStmt, WithStmt, IterForStmt, InForStmt)
+        )
 
     @property
     def sym_name(self):
@@ -131,7 +133,7 @@ class Symbol:
             return self.ws_symbol.decl.doc.value[3:-3]
         except Exception:
             return ""
-        
+
     @property
     def instance_symbols(self):
         symbols: List[Symbol] = []
@@ -140,7 +142,7 @@ class Symbol:
                 if str(sym.sym_type) != "var":
                     continue
                 symbols.append(Symbol(sym, self.doc_uri))
-        return symbols        
+        return symbols
 
     @property
     def defn_loc(self):
@@ -249,14 +251,14 @@ class Symbol:
                 yield from self._yield_direct_children_symbol(self.sym_tab.tab.values())
             for symbol_tab in self.sym_tab.kid:
                 yield from self._yield_nested_block_children(symbol_tab)
-                    
+
         if isinstance(self.node, Architype):
             vars = self.node.get_all_sub_nodes(HasVar)
         elif isinstance(self.node, Ability):
             vars = self.node.get_all_sub_nodes(ParamVar)
         else:
             vars = []
-        
+
         for var in vars:
             yield Symbol(var, self.doc_uri)
 
@@ -272,7 +274,6 @@ class Symbol:
     def _yield_direct_children_symbol(self, symbols):
         for sym in symbols:
             yield Symbol(sym, self.doc_uri)
-
 
     def uses(self, ls: LanguageServer) -> List["Symbol"]:
         for mod_url in ls.jlws.modules.keys():

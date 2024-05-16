@@ -300,6 +300,16 @@ class Symbol:
         kid_symbol = Symbol(kid_sym_tab, self.doc_uri)
         yield kid_symbol
 
+    @property
+    def instance_symbols(self):
+        symbols: List[Symbol] = []
+        if hasattr(self, "sym_tab"):
+            for sym in self.sym_tab.tab.values():
+                if str(sym.sym_type) != "var":
+                    continue
+                symbols.append(Symbol(sym, self.doc_uri))
+        return symbols
+
     def uses(self, ls: LanguageServer) -> List["Symbol"]:
         for mod_url in ls.jlws.modules.keys():
             for x in ls.jlws.get_uses(mod_url):

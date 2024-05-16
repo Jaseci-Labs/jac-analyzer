@@ -101,7 +101,7 @@ def get_completion_items(
     """
     if before_cursor.endswith("."):
         last_symbol_name = re.match(r"(\w+).", last_word).group(1)
-        last_symbol = get_symbol_by_name(last_symbol_name, get_all_symbols(ls, doc))
+        last_symbol = get_symbol_by_name(last_symbol_name, get_all_symbols(ls, doc), 'var')
         if last_symbol:
             for child in last_symbol.instance_symbols:
                 completion_items.append(

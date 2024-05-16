@@ -18,14 +18,12 @@ def jac_to_errors(
 
 
 def validate(
-    ls: LanguageServer, params: any, use_source: bool = False, rebuild: bool = False
+    ls: LanguageServer, params: any, use_source: bool = True, rebuild: bool = False
 ) -> list[Diagnostic]:
     text_doc = ls.workspace.get_text_document(params.text_document.uri)
     source = text_doc.source
     doc_path = params.text_document.uri.replace("file://", "")
-    diagnostics = (
-        _validate_jac(ls, doc_path, source, use_source, rebuild) if source else []
-    )
+    diagnostics = _validate_jac(ls, doc_path, source, use_source, rebuild)
     return diagnostics
 
 

@@ -1,11 +1,470 @@
 {
   "name": "jac-analyzer",
+  "displayName": "jac-analyzer",
+  "description": "Jaclang language support for Visual Studio Code",
+  "private": true,
+  "icon": "icon.png",
   "version": "2024.5.20",
-  "description": "Jaclang is a graph based programming language for AI and ML. This extension provides syntax highlighting , completion, formatting, and linting for Jaclang.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "releaseTag": null,
+  "publisher": "Jaseci Labs",
+  "repository": {
+      "url": "https://github.com/jaseci/jac-analyzer.git",
+      "type": "git"
   },
-  "author": "",
-  "license": "ISC"
+  "homepage": "https://jaseci.github.io/jac-analyzer",
+  "license": "MIT OR Apache-2.0",
+  "keywords": [
+      "jaclang",
+      "jaseci"
+  ],
+  "categories": [
+      "Formatters",
+      "Programming Languages"
+  ],
+  "capabilities": {
+      "untrustedWorkspaces": {
+          "supported": false,
+          "description": "jac-analyzer invokes binaries set up by its configuration as well as the Rust toolchain's binaries. A malicious actor could exploit this to run arbitrary code on your machine."
+      }
+  },
+  "engines": {
+      "vscode": "^1.78.0"
+  },
+  "enabledApiProposals": [],
+  "scripts": {
+      "vscode:prepublish": "npm run build-base -- --minify",
+      "package": "vsce package -o jac-analyzer.vsix",
+      "build-base": "esbuild ./src/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --target=node16",
+      "build": "npm run build-base -- --sourcemap",
+      "watch": "npm run build-base -- --sourcemap --watch",
+      "format": "prettier --write .",
+      "format:check": "prettier --check .",
+      "lint": "eslint -c .eslintrc.js --ext ts ./src ./tests",
+      "lint:fix": "npm run lint -- --fix",
+      "typecheck": "tsc",
+      "pretest": "npm run typecheck && npm run build",
+      "test": "node ./out/tests/runTests.js"
+  },
+  "dependencies": {
+      "@hpcc-js/wasm": "^2.13.0",
+      "anser": "^2.1.1",
+      "d3": "^7.8.5",
+      "d3-graphviz": "^5.0.2",
+      "vscode-languageclient": "^8.1.0"
+  },
+  "devDependencies": {
+      "@tsconfig/strictest": "^2.0.1",
+      "@types/node": "~16.11.7",
+      "@types/vscode": "~1.78.1",
+      "@typescript-eslint/eslint-plugin": "^6.0.0",
+      "@typescript-eslint/parser": "^6.0.0",
+      "@vscode/test-electron": "^2.3.8",
+      "@vscode/vsce": "^2.19.0",
+      "esbuild": "^0.18.12",
+      "eslint": "^8.44.0",
+      "eslint-config-prettier": "^8.8.0",
+      "ovsx": "^0.8.2",
+      "prettier": "^3.0.0",
+      "tslib": "^2.6.0",
+      "typescript": "^5.1.6"
+  },
+  "activationEvents": [
+      "workspaceContains:jac-project.json",
+      "workspaceContains:*/jac-project.json"
+  ],
+  "main": "./out/main",
+  "contributes": {
+      "taskDefinitions": [
+          {
+              "type": "cargo",
+              "required": [
+                  "command"
+              ],
+              "properties": {
+                  "label": {
+                      "type": "string"
+                  },
+                  "command": {
+                      "type": "string"
+                  },
+                  "args": {
+                      "type": "array",
+                      "items": {
+                          "type": "string"
+                      }
+                  },
+                  "env": {
+                      "type": "object",
+                      "patternProperties": {
+                          ".+": {
+                              "type": "string"
+                          }
+                      }
+                  }
+              }
+          }
+      ],
+      "commands": [
+          {
+              "command": "jac-analyzer.syntaxTree",
+              "title": "Show Syntax Tree",
+              "category": "jac-analyzer (debug command)"
+          },
+          {
+              "command": "jac-analyzer.run",
+              "title": "Run",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.debug",
+              "title": "Debug",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.newDebugConfig",
+              "title": "Generate launch configuration",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.analyzerStatus",
+              "title": "Status",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.reloadWorkspace",
+              "title": "Reload workspace",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.restartServer",
+              "title": "Restart server",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.startServer",
+              "title": "Start server",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.stopServer",
+              "title": "Stop server",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.serverVersion",
+              "title": "Show Jac-Analyzer Version",
+              "category": "jac-analyzer"
+          },
+          {
+              "command": "jac-analyzer.toggleCheckOnSave",
+              "title": "Toggle Check on Save",
+              "category": "jac-analyzer"
+          }
+      ],
+      "configuration": {
+          "type": "object",
+          "title": "jac-analyzer",
+          "properties": {
+              "jac-analyzer.runnables.problemMatcher": {
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  },
+                  "default": [
+                      "$rustc"
+                  ],
+                  "markdownDescription": "Problem matchers to use for `rust-analyzer.run` command, eg `[\"$rustc\", \"$rust-panic\"]`."
+              },
+              "jac-analyzer.server.path": {
+                  "type": [
+                      "null",
+                      "string"
+                  ],
+                  "scope": "machine-overridable",
+                  "default": null,
+                  "markdownDescription": "Path to jac-analyzer executable (points to bundled binary by default)."
+              },
+              "jac-analyzer.trace.server": {
+                  "type": "string",
+                  "scope": "window",
+                  "enum": [
+                      "off",
+                      "messages",
+                      "verbose"
+                  ],
+                  "enumDescriptions": [
+                      "No traces",
+                      "Error only",
+                      "Full log"
+                  ],
+                  "default": "off",
+                  "description": "Trace requests to the jac-analyzer (this is usually overly verbose and not recommended for regular users)."
+              },
+              "jac-analyzer.trace.extension": {
+                  "description": "Enable logging of VS Code extensions itself.",
+                  "type": "boolean",
+                  "default": false
+              },
+              "jac-analyzer.debug.engine": {
+                  "type": "string",
+                  "enum": [
+                      "auto",
+                      "ms-python.debugpy"
+                  ],
+                  "default": "auto",
+                  "description": "Preferred debug engine.",
+                  "markdownEnumDescriptions": [
+                      "First try to use the `ms-python.debugpy` extension, then fallback to the default debug engine.",
+                      "Always use the `ms-python.debugpy` extension."
+                  ]
+              },
+              "jac-analyzer.debug.openDebugPane": {
+                  "markdownDescription": "Whether to open up the `Debug Panel` on debugging start.",
+                  "type": "boolean",
+                  "default": false
+              },
+              "jac-analyzer.debug.engineSettings": {
+                  "type": "object",
+                  "default": {},
+                  "markdownDescription": "Optional settings passed to the debug engine. Example: `{ \"lldb\": { \"terminal\":\"external\"} }`"
+              },
+              "jac-analyzer.restartServerOnConfigChange": {
+                  "markdownDescription": "Whether to restart the server automatically when certain settings that require a restart are changed.",
+                  "default": false,
+                  "type": "boolean"
+              },
+              "jac-analyzer.showRequestFailedErrorNotification": {
+                  "markdownDescription": "Whether to show error notifications for failing requests.",
+                  "default": true,
+                  "type": "boolean"
+              },
+              "jac-analyzer.testExplorer": {
+                  "markdownDescription": "Whether to show the test explorer.",
+                  "default": false,
+                  "type": "boolean"
+              },
+              "jac-analyzer.checkOnSave": {
+                  "markdownDescription": "Run the check command for diagnostics on save.",
+                  "default": true,
+                  "type": "boolean"
+              },
+              "jac-analyzer.diagnostics.disabled": {
+                  "markdownDescription": "List of jac-analyzer diagnostics to disable.",
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  },
+                  "uniqueItems": true
+              },
+              "jac-analyzer.diagnostics.enable": {
+                  "markdownDescription": "Whether to show native jac-analyzer diagnostics.",
+                  "default": true,
+                  "type": "boolean"
+              },
+              "jac-analyzer.files.excludeDirs": {
+                  "markdownDescription": "These directories will be ignored by jac-analyzer. They are\nrelative to the workspace root, and globs are not supported. You may\nalso need to add the folders to Code's `files.watcherExclude`.",
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  }
+              },
+              "jac-analyzer.files.watcher": {
+                  "markdownDescription": "Controls file watching implementation.",
+                  "default": "client",
+                  "type": "string",
+                  "enum": [
+                      "client",
+                      "server"
+                  ],
+                  "enumDescriptions": [
+                      "Use the client (editor) to watch files for changes",
+                      "Use server-side file watching"
+                  ]
+              },
+              "jac-analyzer.format.extraArgs": {
+                  "markdownDescription": "Additional arguments to `jac format`.",
+                  "default": [],
+                  "type": "array",
+                  "items": {
+                      "type": "string"
+                  }
+              },
+              "jac-analyzer.format.rangeFormatting.enable": {
+                  "markdownDescription": "Enables the use of range formatting command for the\n`textDocument/rangeFormatting` request.",
+                  "default": false,
+                  "type": "boolean"
+              }
+          }
+      },
+      "problemPatterns": [
+          {
+              "name": "rustc",
+              "patterns": [
+                  {
+                      "regexp": "^(warning|warn|error)(?:\\[(.*?)\\])?: (.*)$",
+                      "severity": 1,
+                      "code": 2,
+                      "message": 3
+                  },
+                  {
+                      "regexp": "^[\\s->=]*(.*?):([1-9]\\d*):([1-9]\\d*)\\s*$",
+                      "file": 1,
+                      "line": 2,
+                      "column": 3
+                  }
+              ]
+          },
+          {
+              "name": "rustc-json",
+              "patterns": [
+                  {
+                      "regexp": "^.*\"message\":{\"message\":\"([^\"]*).*?\"file_name\":\"([^\"]+).*?\"line_start\":(\\d+).*?\"line_end\":(\\d+).*?\"column_start\":(\\d+).*?\"column_end\":(\\d+).*}$",
+                      "message": 1,
+                      "file": 2,
+                      "line": 3,
+                      "endLine": 4,
+                      "column": 5,
+                      "endColumn": 6
+                  }
+              ]
+          },
+          {
+              "name": "rust-panic",
+              "patterns": [
+                  {
+                      "regexp": "^thread '.*' panicked at (.*):(\\d*):(\\d*):$",
+                      "file": 1,
+                      "line": 2,
+                      "column": 3
+                  },
+                  {
+                      "regexp": "(.*)",
+                      "message": 1
+                  }
+              ]
+          }
+      ],
+      "languages": [
+          {
+              "id": "jac_byte_code",
+              "extensions": [
+                  ".jbc"
+              ]
+          },
+          {
+              "id": "jac",
+              "extensions": [
+                  ".jac"
+              ],
+              "aliases": [
+                  "Jac-lang",
+                  "jac"
+              ],
+              "configuration": "language-configuration.json"
+          }
+      ],
+      "grammars": [
+          {
+              "language": "jac",
+              "scopeName": "source.jac",
+              "path": "jac.tmGrammar.json"
+          }
+      ],
+      "problemMatchers": [
+          {
+              "name": "rustc",
+              "owner": "rustc",
+              "source": "rustc",
+              "fileLocation": [
+                  "autoDetect",
+                  "${workspaceRoot}"
+              ],
+              "pattern": "$rustc"
+          },
+          {
+              "name": "rustc-json",
+              "owner": "rustc",
+              "source": "rustc",
+              "fileLocation": [
+                  "autoDetect",
+                  "${workspaceRoot}"
+              ],
+              "pattern": "$rustc-json"
+          },
+          {
+              "name": "rust-panic",
+              "owner": "rust-panic",
+              "source": "panic",
+              "fileLocation": [
+                  "autoDetect",
+                  "${workspaceRoot}"
+              ],
+              "pattern": "$rust-panic"
+          },
+          {
+              "name": "rustc-watch",
+              "owner": "rustc",
+              "source": "rustc",
+              "fileLocation": [
+                  "autoDetect",
+                  "${workspaceRoot}"
+              ],
+              "background": {
+                  "beginsPattern": "^\\[Running\\b",
+                  "endsPattern": "^\\[Finished running\\b"
+              },
+              "pattern": "$rustc"
+          }
+      ],
+      "menus": {
+          "commandPalette": [
+              {
+                  "command": "jac-analyzer.syntaxTree",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.run",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.debug",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.newDebugConfig",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.analyzerStatus",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.reloadWorkspace",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.restartServer",
+                  "when": "inJacProject"
+              },
+              {
+                  "command": "jac-analyzer.serverVersion",
+                  "when": "inJacProject"
+              }
+          ],
+          "editor/context": [
+              {
+                  "command": "rust-analyzer.peekTests",
+                  "when": "inRustProject && editorTextFocus && editorLangId == rust",
+                  "group": "navigation@1000"
+              },
+              {
+                  "command": "rust-analyzer.openDocs",
+                  "when": "inRustProject && editorTextFocus && editorLangId == rust",
+                  "group": "navigation@1001"
+              }
+          ]
+      }
+  }
 }

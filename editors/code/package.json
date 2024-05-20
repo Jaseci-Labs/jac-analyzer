@@ -1,0 +1,11 @@
+{
+  "name": "jac-analyzer",
+  "version": "2024.5.20",
+  "description": "Jaclang is a graph based programming language for AI and ML. This extension provides syntax highlighting , completion, formatting, and linting for Jaclang.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

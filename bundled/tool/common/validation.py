@@ -1,14 +1,29 @@
 from jaclang.compiler.passes.transform import Alert
 from jaclang.compiler.parser import JacParser
 from jaclang.compiler.absyntree import JacSource
-from jaclang.compiler.passes.main import pass_schedule
+from jaclang.compiler.passes.main import (
+    SubNodeTabPass,
+    ImportPass,
+    SymTabBuildPass,
+    DeclDefMatchPass,
+    DefUsePass,
+)
 
 from lsprotocol.types import Diagnostic, DiagnosticSeverity, Position, Range
 from pygls.server import LanguageServer
 
 
+default_schedule = [
+    SubNodeTabPass,
+    ImportPass,
+    SymTabBuildPass,
+    DeclDefMatchPass,
+    DefUsePass,
+]
+
+
 def jac_to_errors(
-    file_path: str, source: str, schedule=pass_schedule
+    file_path: str, source: str, schedule=default_schedule
 ) -> tuple[list[Alert], list[Alert]]:
     source = JacSource(source, file_path)
     prse = JacParser(source)

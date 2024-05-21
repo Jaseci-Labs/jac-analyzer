@@ -18,7 +18,7 @@ The Jac-Analyzer is a Visual Studio Code extension that provides Language Server
 | Command                | Description                         |
 | ---------------------- | ----------------------------------- |
 | jaclang: Restart Server | Force restart the language server. |
-| jaclang: Run Tests      | Run tests in the workspace. | 
+| jaclang: Run Tests      | Run tests in the workspace. |
 | jaclang: Run File       | Run the file in the workspace. |
 | jaclang: Clear Cache    | Clear the cache. |
 

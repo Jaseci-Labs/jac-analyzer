@@ -2,6 +2,7 @@
 .mypy_cache
 __pycache__
 .pytest_cache
+# *rs.ts
 
 # Node
 node_modules

@@ -40,7 +40,7 @@ OFFSET = 1
 
 
 def fill_workspace(ls: LanguageServer) -> None:
-    ls.jlws = Workspace(path=ls.workspace.root_path)
+    ls.jlws = Workspace(path=ls.workspace.root_path, type_check=False)
     for mod_path, mod_info in ls.jlws.modules.items():
         doc = TextDocumentItem(
             uri=f"file://{mod_path}",

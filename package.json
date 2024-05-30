@@ -153,7 +153,7 @@
                     "markdownDescription": "%settings.typeCheck.description%",
                     "scope": "resource",
                     "type": "boolean"
-                },
+                }
             }
         },
         "languages": [

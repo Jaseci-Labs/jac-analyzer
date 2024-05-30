@@ -3,7 +3,8 @@ from jaclang.compiler.parser import JacParser
 from jaclang.compiler.absyntree import JacSource
 from jaclang.compiler.passes.main import (
     SubNodeTabPass,
-    ImportPass,
+    JacImportPass,
+    PyImportPass,
     SymTabBuildPass,
     DeclDefMatchPass,
     DefUsePass,
@@ -15,7 +16,8 @@ from pygls.server import LanguageServer
 
 default_schedule = [
     SubNodeTabPass,
-    ImportPass,
+    JacImportPass,
+    PyImportPass,
     SymTabBuildPass,
     DeclDefMatchPass,
     DefUsePass,

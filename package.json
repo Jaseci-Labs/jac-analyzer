@@ -2,7 +2,7 @@
     "name": "jaclang-extension",
     "displayName": "%extension.displayName%",
     "description": "%extension.description%",
-    "version": "2024.5.16",
+    "version": "2024.5.30",
     "preview": true,
     "serverInfo": {
         "name": "Jaclang Language Server",
@@ -147,7 +147,13 @@
                     "markdownDescription": "%settings.showWarnings.description%",
                     "scope": "resource",
                     "type": "boolean"
-                }
+                },
+                "jaclang.typeCheck": {
+                    "default": false,
+                    "markdownDescription": "%settings.typeCheck.description%",
+                    "scope": "resource",
+                    "type": "boolean"
+                },
             }
         },
         "languages": [

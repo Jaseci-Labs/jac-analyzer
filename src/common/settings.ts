@@ -20,6 +20,7 @@ export interface ISettings {
     showNotifications: string;
     reportingScope: string;
     showWarning: boolean;
+    typeCheck: boolean;
 }
 
 export function getExtensionSettings(namespace: string, includeInterpreter?: boolean): Promise<ISettings[]> {
@@ -104,7 +105,7 @@ export async function getWorkspaceSettings(
         showNotifications: config.get<string>('showNotifications', 'off'),
         reportingScope: config.get<string>('reportingScope', 'file'),
         showWarning: config.get<boolean>('showWarning', true),
-
+        typeCheck: config.get<boolean>('typeCheck', false),
     };
     return workspaceSetting;
 }
@@ -134,6 +135,7 @@ export async function getGlobalSettings(namespace: string, includeInterpreter?: 
         showNotifications: getGlobalValue<string>(config, 'showNotifications', 'off'),
         reportingScope: config.get<string>('reportingScope', 'file'),
         showWarning: getGlobalValue<boolean>(config, 'showWarning', true),
+        typeCheck: getGlobalValue<boolean>(config, 'typeCheck', false),
     };
     return setting;
 }
@@ -146,6 +148,7 @@ export function checkIfConfigurationChanged(e: ConfigurationChangeEvent, namespa
         `${namespace}.showNotifications`,
         `${namespace}.reportingScope`,
         `${namespace}.showWarning`,
+        `${namespace}.typeCheck`,
     ];
     const changed = settings.map((s) => e.affectsConfiguration(s));
     return changed.includes(true);

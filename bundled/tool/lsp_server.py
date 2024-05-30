@@ -508,7 +508,7 @@ def initialize(params: lsp.InitializeParams) -> None:
 
     # Add extra paths to sys.path
     setting = _get_settings_by_path(pathlib.Path(os.getcwd()))
-    for extra in setting.get("extraPaths", []):
+    for extra in setting.get("interpreter", []):
         update_sys_path(extra, import_strategy)
     fill_workspace(LSP_SERVER)
 
@@ -537,7 +537,7 @@ def did_change_configuration(ls, params: lsp.DidChangeConfigurationParams):
 
 def _get_global_defaults():
     return {
-        "path": GLOBAL_SETTINGS.get("path", []),
+        "interpreter": GLOBAL_SETTINGS.get("interpreter", []),
         "severity": GLOBAL_SETTINGS.get(
             "severity",
             {
@@ -549,6 +549,7 @@ def _get_global_defaults():
         "showNotifications": GLOBAL_SETTINGS.get("showNotifications", "off"),
         "reportingScope": GLOBAL_SETTINGS.get("reportingScope", "file"),
         "showWarnings": GLOBAL_SETTINGS.get("showWarnings", False),
+        "typeCheck": GLOBAL_SETTINGS.get("typeCheck", False),
     }
 
 

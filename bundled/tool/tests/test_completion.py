@@ -11,7 +11,7 @@ from common.symbols import fill_workspace  # noqa: E402
 
 
 class TestGetCompletionItems(unittest.TestCase):
-    ls = MockLanguageServer("bundled/tool/tests/fixtures")
+    ls = MockLanguageServer(root_path="bundled/tool/tests/fixtures")
     fill_workspace(ls)
 
     def test_empty_before_cursor(self):
